@@ -461,14 +461,14 @@ var Unirest = function (method, uri, headers, body, callback) {
           if (body) {
             type = Unirest.type(result.headers['content-type'], true)
             if (type) {
-                try {
-                    result.body = Unirest.Response.parse(body, type);
-                } catch (e) {
-                    result.error = e;
-                    return callback(result);
-                }
+              try {
+                result.body = Unirest.Response.parse(body, type)
+              } catch (e) {
+                result.error = e
+                return callback(result)
+              }
             } else {
-                result.body = body;
+                result.body = body
             }
           }
           /* End Axway modification */
@@ -863,11 +863,7 @@ Unirest.parsers = {
   },
 
   json: function (data) {
-    try {
-      data = JSON.parse(data)
-    } catch (e) {}
-
-    return data
+    return JSON.parse(data)
   }
 }
 
