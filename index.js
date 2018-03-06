@@ -331,7 +331,7 @@ var Unirest = function (method, uri, headers, body, callback) {
       /**
        * Instructs the Request to be retried if specified error status codes (4xx, 5xx, ETIMEDOUT) are returned.
        * Retries are delayed with an exponential backoff.
-       * 
+       *
        * @param {(err: Error) => boolean} [callback] - Invoked on response error. Return false to stop next request.
        * @param {Object} [options] - Optional retry configuration to override defaults.
        * @param {number} [options.attempts=3] - The number of retry attempts.
@@ -451,6 +451,29 @@ var Unirest = function (method, uri, headers, body, callback) {
           // Create response status reference
           status = response.statusCode
 
+          /* Axway modification: Error on unparsable content */
+          // Obtain response body
+          body = body || response.body
+          result.raw_body = body
+          result.headers = response.headers
+
+          // Handle Response Body
+          if (body) {
+            type = Unirest.type(result.headers['content-type'], true)
+            if (type) {
+                try {
+                    result.body = Unirest.Response.parse(body, type);
+                } catch (e) {
+                    result.error = e;
+                    return callback(result);
+                }
+            } else {
+                result.body = body;
+            }
+          }
+          /* End Axway modification */
+
+
           // Normalize MSIE response to HTTP 204
           status = (status === 1223 ? 204 : status)
 
@@ -517,19 +540,6 @@ var Unirest = function (method, uri, headers, body, callback) {
             }
           }
 
-          // Obtain response body
-          body = body || response.body
-          result.raw_body = body
-          result.headers = response.headers
-
-          // Handle Response Body
-          if (body) {
-            type = Unirest.type(result.headers['content-type'], true)
-            if (type) data = Unirest.Response.parse(body, type)
-            else data = body
-          }
-
-          result.body = data
 
           ;(handleRetriableRequestResponse(result)) && (callback) && callback(result)
         }
