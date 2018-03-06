@@ -863,7 +863,11 @@ Unirest.parsers = {
   },
 
   json: function (data) {
-    return JSON.parse(data)
+    if (typeof data === "string") {
+      return JSON.parse(data)
+    } else {
+      return data // Already parsed
+    }
   }
 }
 
